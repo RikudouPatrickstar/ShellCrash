@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'new version of ShellClash, such as 1.7.0f'
+        description: 'new version of ShellCrash, such as 1.7.0f'
         required: true
         type: string
       release_type:
@@ -35,21 +35,35 @@ jobs:
       if: ${{ github.event.inputs.release_type != '正式版' }}
       run: |
         cd ./bin
+        # 打包 public.tar.gz
+        rm ./public.tar.gz
+        mkdir public && pushd public
+          cp ../../rules/clash_providers/clash_providers.list ./
+          cp ../../rules/singbox_providers/singbox_providers.list ./
+          cp ../../public/*.list ./
+          tar zcvf ../public.tar.gz *
+        popd && rm -fr public
         # 打包 clashfm.tar.gz
         rm ./clashfm.tar.gz
         mkdir clashfm && pushd clashfm
           cp ../../scripts/* ./
           chmod +x *
+          cp ../../rules/clash_providers/clash_providers.list ./
+          cp ../../rules/singbox_providers/singbox_providers.list ./
+          cp ../../public/*.list ./
           tar zcvf ../clashfm.tar.gz *
         popd && rm -fr clashfm
-        # 打包 ShellClash.tar.gz
-        rm ./ShellClash.tar.gz
-        mkdir ShellClash && pushd ShellClash
+        # 打包 ShellCrash.tar.gz
+        rm ./ShellCrash.tar.gz
+        mkdir ShellCrash && pushd ShellCrash
           cp ../../scripts/* ./
           chmod +x *
-          cp ../Country.mmdb ./
-          tar zcvf ../ShellClash.tar.gz *
-        popd && rm -fr ./ShellClash
+          cp ../../rules/clash_providers/clash_providers.list ./
+          cp ../../rules/singbox_providers/singbox_providers.list ./
+          cp ../../public/*.list ./
+          cp ../geodata/Country.mmdb ./
+          tar zcvf ../ShellCrash.tar.gz *
+        popd && rm -fr ./ShellCrash
     - name: Commit and push
       if: ${{ github.event.inputs.release_type != '内测版' }}
       run: |
@@ -65,7 +79,7 @@ jobs:
       run: |
         mkdir artifacts
         cp ./bin/clashfm.tar.gz ./artifacts/
-        cp ./bin/ShellClash.tar.gz ./artifacts/
+        cp ./bin/ShellCrash.tar.gz ./artifacts/
         echo "artifact_name=${new_type}_${new_version}_$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
     - name: Upload Test Artifact
       uses: actions/upload-artifact@main
